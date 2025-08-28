@@ -1,4 +1,5 @@
 # lib/helpers.py
+from tabulate import tabulate
 from models import Session
 from models.department import Department
 from models.employee import Employee
@@ -8,12 +9,6 @@ from models.project import Project
 def _get_session():
     return Session()
 
-def _print_list(items):
-    if not items:
-        print("(no records)")
-    for item in items:
-        print(item)
-
 def _ask(prompt):
     return input(prompt).strip()
 
@@ -21,13 +16,21 @@ def _ask(prompt):
 def list_departments():
     with _get_session() as s:
         deps = Department.get_all(s)
-        _print_list(deps)
+        if not deps:
+            print("(no records)")
+        else:
+            table = [(d.id, d.name, d.location) for d in deps]
+            print(tabulate(table, headers=["ID", "Name", "Location"], tablefmt="grid"))
 
 def find_department_by_name():
     name = _ask("Enter the department's name: ")
     with _get_session() as s:
         d = Department.find_by_name(s, name)
-        print(d) if d else print(f"Department '{name}' not found")
+        if d:
+            table = [(d.id, d.name, d.location)]
+            print(tabulate(table, headers=["ID", "Name", "Location"], tablefmt="grid"))
+        else:
+            print(f"Department '{name}' not found")
 
 def create_department():
     name = _ask("Enter the department's name: ")
@@ -35,7 +38,8 @@ def create_department():
     with _get_session() as s:
         try:
             d = Department.create(s, name=name, location=location)
-            print(f"Success: {d}")
+            table = [(d.id, d.name, d.location)]
+            print(tabulate(table, headers=["ID", "Name", "Location"], tablefmt="grid"))
         except Exception as e:
             s.rollback()
             print("Error creating department:", e)
@@ -51,7 +55,8 @@ def update_department():
             name = _ask("Enter the department's new name: ")
             location = _ask("Enter the department's new location: ")
             d.update(s, name=name, location=location)
-            print(f"Success: {d}")
+            table = [(d.id, d.name, d.location)]
+            print(tabulate(table, headers=["ID", "Name", "Location"], tablefmt="grid"))
         except Exception as e:
             s.rollback()
             print("Error updating department:", e)
@@ -73,25 +78,44 @@ def list_department_employees():
         if not d:
             print(f"Department {id_} not found")
             return
-        _print_list(d.employees)
+        if not d.employees:
+            print("(no employees in this department)")
+        else:
+            table = [
+                (e.id, e.first_name, e.last_name, e.email, f"${e.salary:.2f}")
+                for e in d.employees
+            ]
+            print(tabulate(table, headers=["ID", "First Name", "Last Name", "Email", "Salary"], tablefmt="grid"))
 
 # ---------- Employee actions ----------
 def list_employees():
     with _get_session() as s:
         emps = Employee.get_all(s)
-        _print_list(emps)
+        if not emps:
+            print("(no records)")
+        else:
+            table = [(e.id, e.first_name, e.last_name, e.email, f"${e.salary:.2f}", e.department_id) for e in emps]
+            print(tabulate(table, headers=["ID", "First Name", "Last Name", "Email", "Salary", "Dept ID"], tablefmt="grid"))
 
 def find_employee_by_name():
     name = _ask("Enter the employee's name (First Last or either): ")
     with _get_session() as s:
         e = Employee.find_by_name(s, name)
-        print(e) if e else print(f"Employee '{name}' not found")
+        if e:
+            table = [(e.id, e.first_name, e.last_name, e.email, f"${e.salary:.2f}", e.department_id)]
+            print(tabulate(table, headers=["ID", "First Name", "Last Name", "Email", "Salary", "Dept ID"], tablefmt="grid"))
+        else:
+            print(f"Employee '{name}' not found")
 
 def find_employee_by_id():
     id_ = _ask("Enter the employee's id: ")
     with _get_session() as s:
         e = Employee.find_by_id(s, id_)
-        print(e) if e else print(f"Employee {id_} not found")
+        if e:
+            table = [(e.id, e.first_name, e.last_name, e.email, f"${e.salary:.2f}", e.department_id)]
+            print(tabulate(table, headers=["ID", "First Name", "Last Name", "Email", "Salary", "Dept ID"], tablefmt="grid"))
+        else:
+            print(f"Employee {id_} not found")
 
 def create_employee():
     first = _ask("Enter the employee's first name: ")
@@ -101,7 +125,6 @@ def create_employee():
     dept_id = _ask("Enter the employee's department id: ")
     with _get_session() as s:
         try:
-            # Ensure department exists
             d = Department.find_by_id(s, dept_id)
             if not d:
                 print("Error: department_id must reference an existing department")
@@ -114,7 +137,8 @@ def create_employee():
                 salary=salary,
                 department_id=d.id,
             )
-            print(f"Success: {e}")
+            table = [(e.id, e.first_name, e.last_name, e.email, f"${e.salary:.2f}", e.department_id)]
+            print(tabulate(table, headers=["ID", "First Name", "Last Name", "Email", "Salary", "Dept ID"], tablefmt="grid"))
         except Exception as ex:
             s.rollback()
             print("Error creating employee:", ex)
@@ -144,7 +168,8 @@ def update_employee():
                 salary=salary,
                 department_id=d.id,
             )
-            print(f"Success: {e}")
+            table = [(e.id, e.first_name, e.last_name, e.email, f"${e.salary:.2f}", e.department_id)]
+            print(tabulate(table, headers=["ID", "First Name", "Last Name", "Email", "Salary", "Dept ID"], tablefmt="grid"))
         except Exception as ex:
             s.rollback()
             print("Error updating employee:", ex)
@@ -163,13 +188,21 @@ def delete_employee():
 def list_projects():
     with _get_session() as s:
         projs = Project.get_all(s)
-        _print_list(projs)
+        if not projs:
+            print("(no records)")
+        else:
+            table = [(p.id, p.name, f"${p.budget:.2f}") for p in projs]
+            print(tabulate(table, headers=["ID", "Name", "Budget"], tablefmt="grid"))
 
 def find_project_by_name():
     name = _ask("Enter the project's name: ")
     with _get_session() as s:
         p = Project.find_by_name(s, name)
-        print(p) if p else print(f"Project '{name}' not found")
+        if p:
+            table = [(p.id, p.name, f"${p.budget:.2f}")]
+            print(tabulate(table, headers=["ID", "Name", "Budget"], tablefmt="grid"))
+        else:
+            print(f"Project '{name}' not found")
 
 def create_project():
     name = _ask("Enter the project's name: ")
@@ -177,7 +210,8 @@ def create_project():
     with _get_session() as s:
         try:
             p = Project.create(s, name=name, budget=budget)
-            print(f"Success: {p}")
+            table = [(p.id, p.name, f"${p.budget:.2f}")]
+            print(tabulate(table, headers=["ID", "Name", "Budget"], tablefmt="grid"))
         except Exception as ex:
             s.rollback()
             print("Error creating project:", ex)
