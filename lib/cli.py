@@ -1,4 +1,5 @@
 # lib/cli.py
+from tabulate import tabulate
 from helpers import (
     exit_program,
 
@@ -74,7 +75,18 @@ def main():
         action = ROUTES.get(choice)
         if action:
             try:
-                action()
+                result = action()
+                # 🔹 If the action returned a list of models, format into a table
+                if isinstance(result, list) and result:
+                    if hasattr(result[0], "__dict__"):
+                        rows = []
+                        for obj in result:
+                            data = {k: v for k, v in obj.__dict__.items() if not k.startswith("_")}
+                            rows.append(list(data.values()))
+                        headers = [k for k in result[0].__dict__.keys() if not k.startswith("_")]
+                        print(tabulate(rows, headers=headers, tablefmt="grid"))
+                elif result:
+                    print(result)
             except SystemExit:
                 print("Exited.")
                 break
