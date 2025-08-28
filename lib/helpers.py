@@ -196,21 +196,23 @@ def list_projects():
         for p in projs:
             if p.employees:  # If project has employees
                 for e in p.employees:
+                    dept_name = e.department.name if e.department else "N/A"
                     rows.append([
                         e.id,
                         e.full_name,
+                        dept_name,
                         p.name,
                         f"${p.budget:.2f}"
                     ])
             else:
                 # Show project even if it has no employees assigned
                 rows.append([
-                    "-", "No employee assigned", p.name, f"${p.budget:.2f}"
+                    "-", "No employee assigned", "-", p.name, f"${p.budget:.2f}"
                 ])
 
         print(tabulate(
             rows,
-            headers=["Employee ID", "Employee Name", "Project Name", "Budget"],
+            headers=["Employee ID", "Employee Name", "Department", "Project Name", "Budget"],
             tablefmt="grid"
         ))
 
