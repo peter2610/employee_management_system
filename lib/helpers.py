@@ -190,9 +190,30 @@ def list_projects():
         projs = Project.get_all(s)
         if not projs:
             print("(no records)")
-        else:
-            table = [(p.id, p.name, f"${p.budget:.2f}") for p in projs]
-            print(tabulate(table, headers=["ID", "Name", "Budget"], tablefmt="grid"))
+            return
+
+        rows = []
+        for p in projs:
+            if p.employees:  # If project has employees
+                for e in p.employees:
+                    rows.append([
+                        e.id,
+                        e.full_name,
+                        p.name,
+                        f"${p.budget:.2f}"
+                    ])
+            else:
+                # Show project even if it has no employees assigned
+                rows.append([
+                    "-", "No employee assigned", p.name, f"${p.budget:.2f}"
+                ])
+
+        print(tabulate(
+            rows,
+            headers=["Employee ID", "Employee Name", "Project Name", "Budget"],
+            tablefmt="grid"
+        ))
+
 
 def find_project_by_name():
     name = _ask("Enter the project's name: ")
