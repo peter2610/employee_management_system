@@ -2,7 +2,7 @@
 from sqlalchemy import Column, Integer, String, Float, Table, ForeignKey, UniqueConstraint, CheckConstraint
 from sqlalchemy.orm import relationship, validates
 
- . import Base
+from . import Base
 
 # Association table for many-to-many Employee <-> Project
 employee_project = Table(
