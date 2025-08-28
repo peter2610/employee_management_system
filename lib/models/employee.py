@@ -2,7 +2,7 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import relationship, validates
 
- . import Base
+from . import Base
 
 class Employee(Base):
     __tablename__ = "employees"
