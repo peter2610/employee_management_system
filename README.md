@@ -16,7 +16,7 @@ How data structures like lists, dictionaries, tuples, and strings are applied in
 
 One-to-Many → Department → Employees
 
-Many-to-Many → Employees ↔ Projects (via a junction table)
+Many-to-Many → Employees ↔ Projects 
 
 # 🚀 Features
 
@@ -124,7 +124,6 @@ ROUTES = {
 "7": list_employees,
 "13": list_projects
 }
-
 Tuples
 Used when returning query results with multiple values or passing grouped values to functions.
 Example: (employee_id, project_id) in the junction table.
