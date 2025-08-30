@@ -142,7 +142,8 @@ Listing projects with employees:
 | 1 | Peter Munyambu | IT | Cloud Migration | $200000.00 |
 +-------------+----------------+----------------------+-----------------+------------+
 
-# Author 
+# Author
+
 peter NM
 
 # license
